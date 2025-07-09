@@ -1,0 +1,89 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Materiale;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+class MaterialeController extends Controller
+{
+    /**
+     * Mostrar la lista de materiales.
+     */
+    public function index()
+    {
+        $materiales = Materiale::paginate(10);
+        return Inertia::render("Material/Index", [
+            'materiales' => $materiales
+        ]);
+    }
+
+    /**
+     * Mostrar el formulario para crear un nuevo material.
+     */
+    public function create()
+    {
+        return Inertia::render('Material/Form');
+    }
+
+    /**
+     * Almacenar un nuevo material en la base de datos.
+     */
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'nombre' => 'required|string|max:255',
+            'cantidad' => 'required|integer|min:0',
+            'unidadmedida' => 'required|string|max:50',
+            'fechavencimiento' => 'required|date',
+        ]);
+
+        Materiale::create($data);
+
+        return redirect(route('material.index'))
+            ->with('success', 'Material registrado correctamente.');
+    }
+
+    /**
+     * Mostrar el formulario para editar un material existente.
+     */
+    public function edit($id)
+    {
+        $materiale = Materiale::findOrFail($id);
+        return Inertia::render('Material/Form', [
+            'materiale' => $materiale
+        ]);
+    }
+
+    /**
+     * Actualizar un material en la base de datos.
+     */
+    public function update(Request $request, $id)
+    {
+        $materiale = Materiale::findOrFail($id);
+
+        $data = $request->validate([
+            'nombre' => 'required|string|max:255',
+            'cantidad' => 'required|integer|min:0',
+            'unidadmedida' => 'required|string|max:50',
+            'fechavencimiento' => 'required|date',
+        ]);
+
+        $materiale->update($data);
+
+        return redirect(route('material.index'))
+            ->with('success', 'Material actualizado correctamente.');
+    }
+
+    /**
+     * Eliminar un material del inventario.
+     */
+    public function destroy($id)
+    {
+        Materiale::findOrFail($id)->delete();
+
+        return redirect(route('material.index'))
+            ->with('success', 'Material eliminado correctamente.');
+    }
+}
