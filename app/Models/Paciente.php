@@ -8,19 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Paciente extends Model
 {
     use HasFactory;
-    
-    /**
-     * Tabla asociada al modelo.
-     *
-     * @var string
-     */
+
     protected $table = 'pacientes';
 
-    /**
-     * Los atributos que se pueden asignar masivamente.
-     *
-     * @var array
-     */
     protected $fillable = [
         'nombre',
         'aPaterno',
@@ -31,19 +21,15 @@ class Paciente extends Model
         'dni',
         'ocupacion',
         'alergias',
+        'detalleAlergias',
         'programaEducativo',
         'semestre',
         'telefono',
         'parentesco',
+        'detalleParentesco', // ⚡ NUEVO
         'telefonoEmergencia',
     ];
 
-    /**
-     * Las fechas que deben ser tratadas como objetos de Carbon.
-     *
-     * @var array
-     */
-    protected $dates = [
-        'fechaNacimiento',
-    ];
+    protected $dates = ['fechaNacimiento'];
 }
+

@@ -13,75 +13,64 @@ export default function FormularioPaciente({ auth, paciente }) {
         dni: paciente?.dni || '',
         ocupacion: paciente?.ocupacion || '',
         alergias: paciente?.alergias || '',
-        detalleAlergias: paciente?.detalleAlergias || '',
-        programaEducativo: paciente?.programaEducativo || '',  // Asegurarse de que el programa educativo esté correctamente asignado
+        programaEducativo: paciente?.programaEducativo || '',
         semestre: paciente?.semestre || '',
-        telefono: paciente?.telefono || '',
-        parentesco: paciente?.parentesco || '',
-        telefonoEmergencia: paciente?.telefonoEmergencia || '',
+        telefono: paciente?.telefono || '', // 👉 Teléfono del paciente
+        parentesco: paciente?.parentesco || '', // 👉 Parentesco del contacto
+        detalleParentesco: paciente?.detalleParentesco || '',
+        telefonoEmergencia: paciente?.telefonoEmergencia || '', // 👉 Teléfono del contacto
     });
 
-    // Estado para controlar la visibilidad de los campos de Semestre y Programa Educativo
     const [showSemestrePrograma, setShowSemestrePrograma] = useState(data.ocupacion === 'Estudiante');
-    const [showAlergiasDetail, setShowAlergiasDetail] = useState(data.alergias === 'Sí');
+    const [showParentescoOtro, setShowParentescoOtro] = useState(data.parentesco === 'Otro');
 
-    // Cambiar visibilidad de los campos de semestre y programa educativo según la ocupación
     useEffect(() => {
         setShowSemestrePrograma(data.ocupacion === 'Estudiante');
     }, [data.ocupacion]);
 
-    // Cambiar visibilidad del campo de detalles de alergias
     useEffect(() => {
-        setShowAlergiasDetail(data.alergias === 'Sí');
-    }, [data.alergias]);
+        setShowParentescoOtro(data.parentesco === 'Otro');
+    }, [data.parentesco]);
 
-    // Calcular edad automáticamente cuando cambia la fecha de nacimiento
     useEffect(() => {
         if (data.fechaNacimiento) {
             const birthDate = new Date(data.fechaNacimiento);
             const today = new Date();
             let age = today.getFullYear() - birthDate.getFullYear();
-            const month = today.getMonth();
-            const day = today.getDate();
-
-            // Ajustar la edad si aún no ha llegado el cumpleaños este año
-            if (month < birthDate.getMonth() || (month === birthDate.getMonth() && day < birthDate.getDate())) {
+            if (
+                today.getMonth() < birthDate.getMonth() ||
+                (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())
+            ) {
                 age--;
             }
-
             setData('edad', age.toString());
+            if (age < 16) {
+                alert("El paciente debe ser mayor de 16 años.");
+                setData('fechaNacimiento', '');
+                setData('edad', '');
+            }
         }
     }, [data.fechaNacimiento]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        const finalData = { ...data };
 
-        // Si el paciente existe, se actualiza
         if (paciente) {
             put(route('paciente.update', paciente.id), {
-                data,
-                onSuccess: () => {
-                    alert("Paciente actualizado exitosamente!");
-                },
-                onError: () => {
-                    alert("Hubo un error al actualizar el paciente.");
-                },
+                data: finalData,
+                onSuccess: () => alert("Paciente actualizado exitosamente!"),
+                onError: () => alert("Hubo un error al actualizar el paciente."),
             });
         } else {
-            // Si el paciente no existe, se crea
             post(route('paciente.store'), {
-                data,
-                onSuccess: () => {
-                    alert("Paciente creado exitosamente!");
-                },
-                onError: () => {
-                    alert("Hubo un error al crear el paciente.");
-                },
+                data: finalData,
+                onSuccess: () => alert("Paciente registrado exitosamente!"),
+                onError: () => alert("Hubo un error al registrar el paciente."),
             });
         }
     };
 
-    // Lista de programas educativos
     const programas = [
         "Desarrollo de Sistema de Información",
         "Enfermería Técnica",
@@ -95,255 +84,233 @@ export default function FormularioPaciente({ auth, paciente }) {
         "Contabilidad"
     ];
 
-    // Semestres (1 a 6)
     const semestres = [1, 2, 3, 4, 5, 6];
+    const parentescos = ["Hermano(a)", "Padre", "Madre", "Tío(a)", "Otro"];
 
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Agregar/Modificar Paciente</h2>}
+            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                {paciente ? "Editar Paciente" : "Registrar Paciente"}
+            </h2>}
         >
             <Head title="Paciente" />
 
             <div className="py-12 flex justify-center">
-                <form onSubmit={handleSubmit} className="w-full max-w-4xl space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Nombre */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                            <input
-                                type="text"
-                                value={data.nombre}
-                                onChange={(e) => setData('nombre', e.target.value)}
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                                required
-                            />
-                            {errors.nombre && <div className="text-sm text-red-600">{errors.nombre}</div>}
-                        </div>
+                <form
+                    onSubmit={handleSubmit}
+                    className="w-full max-w-4xl bg-white p-8 rounded-lg shadow-md space-y-8"
+                >
+                    {/* 📌 SECCIÓN: Datos del Paciente */}
+                    <fieldset className="border border-gray-300 rounded-md p-6">
+                        <legend className="text-base font-semibold text-gray-700 px-2">Datos del Paciente</legend>
 
-                        {/* Apellido Paterno */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Apellido Paterno</label>
-                            <input
-                                type="text"
-                                value={data.aPaterno}
-                                onChange={(e) => setData('aPaterno', e.target.value)}
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                                required
-                            />
-                            {errors.aPaterno && <div className="text-sm text-red-600">{errors.aPaterno}</div>}
-                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                                <input
+                                    type="text"
+                                    value={data.nombre}
+                                    onChange={(e) => setData('nombre', e.target.value)}
+                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                    required
+                                />
+                            </div>
 
-                        {/* Apellido Materno */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Apellido Materno</label>
-                            <input
-                                type="text"
-                                value={data.aMaterno}
-                                onChange={(e) => setData('aMaterno', e.target.value)}
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                                required
-                            />
-                            {errors.aMaterno && <div className="text-sm text-red-600">{errors.aMaterno}</div>}
-                        </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Apellido Paterno</label>
+                                <input
+                                    type="text"
+                                    value={data.aPaterno}
+                                    onChange={(e) => setData('aPaterno', e.target.value)}
+                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                    required
+                                />
+                            </div>
 
-                        {/* Sexo */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Sexo</label>
-                            <select
-                                value={data.sexo}
-                                onChange={(e) => setData('sexo', e.target.value)}
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                                required
-                            >
-                                <option value="">Seleccione...</option>
-                                <option value="M">Masculino</option>
-                                <option value="F">Femenino</option>
-                            </select>
-                            {errors.sexo && <div className="text-sm text-red-600">{errors.sexo}</div>}
-                        </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Apellido Materno</label>
+                                <input
+                                    type="text"
+                                    value={data.aMaterno}
+                                    onChange={(e) => setData('aMaterno', e.target.value)}
+                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                    required
+                                />
+                            </div>
 
-                        {/* Fecha de Nacimiento */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Fecha de Nacimiento</label>
-                            <input
-                                type="date"
-                                value={data.fechaNacimiento}
-                                onChange={(e) => setData('fechaNacimiento', e.target.value)}
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                                required
-                                readOnly={!!paciente} // Solo lectura si se está editando
-                            />
-                            {errors.fechaNacimiento && <div className="text-sm text-red-600">{errors.fechaNacimiento}</div>}
-                        </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Sexo</label>
+                                <select
+                                    value={data.sexo}
+                                    onChange={(e) => setData('sexo', e.target.value)}
+                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                    required
+                                >
+                                    <option value="">Seleccione...</option>
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Femenino</option>
+                                </select>
+                            </div>
 
-                        {/* Edad */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Edad</label>
-                            <input
-                                type="text"
-                                value={data.edad}
-                                onChange={(e) => setData('edad', e.target.value)}
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                                required
-                                readOnly
-                            />
-                            {errors.edad && <div className="text-sm text-red-600">{errors.edad}</div>}
-                        </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Fecha de Nacimiento</label>
+                                <input
+                                    type="date"
+                                    value={data.fechaNacimiento}
+                                    onChange={(e) => setData('fechaNacimiento', e.target.value)}
+                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                    required
+                                />
+                            </div>
 
-                        {/* DNI */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">DNI</label>
-                            <input
-                                type="text"
-                                value={data.dni}
-                                onChange={(e) => setData('dni', e.target.value)}
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                                required
-                                readOnly={!!paciente} // Solo lectura si se está editando
-                            />
-                            {errors.dni && <div className="text-sm text-red-600">{errors.dni}</div>}
-                        </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Edad</label>
+                                <input
+                                    type="text"
+                                    value={data.edad}
+                                    readOnly
+                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100"
+                                />
+                            </div>
 
-                        {/* Ocupación */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Ocupación</label>
-                            <select
-                                value={data.ocupacion}
-                                onChange={(e) => setData('ocupacion', e.target.value)}
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                                required
-                                disabled={!!paciente} // Deshabilitado si es edición
-                            >
-                                <option value="">Seleccione...</option>
-                                <option value="Estudiante">Estudiante</option>
-                                <option value="Docente">Docente</option>
-                                <option value="AreaAdministrativa">AreaAdministrativa</option>
-                            </select>
-                            {errors.ocupacion && <div className="text-sm text-red-600">{errors.ocupacion}</div>}
-                        </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">DNI</label>
+                                <input
+                                    type="text"
+                                    value={data.dni}
+                                    onChange={(e) => setData('dni', e.target.value)}
+                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                    required
+                                />
+                            </div>
 
-                        {/* Programa Educativo y Semestre */}
-                        {showSemestrePrograma && (
-                            <>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Ocupación</label>
+                                <select
+                                    value={data.ocupacion}
+                                    onChange={(e) => setData('ocupacion', e.target.value)}
+                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                    required
+                                >
+                                    <option value="">Seleccione...</option>
+                                    <option value="Estudiante">Estudiante</option>
+                                    <option value="Docente">Docente</option>
+                                    <option value="Área Administrativa">Área Administrativa</option>
+                                </select>
+                            </div>
+
+                            {showSemestrePrograma && (
+                                <>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Programa Educativo</label>
+                                        <select
+                                            value={data.programaEducativo}
+                                            onChange={(e) => setData('programaEducativo', e.target.value)}
+                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                            required
+                                        >
+                                            <option value="">Seleccione...</option>
+                                            {programas.map((p, i) => (
+                                                <option key={i} value={p}>{p}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Semestre</label>
+                                        <select
+                                            value={data.semestre}
+                                            onChange={(e) => setData('semestre', e.target.value)}
+                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                            required
+                                        >
+                                            <option value="">Seleccione...</option>
+                                            {semestres.map(s => (
+                                                <option key={s} value={s}>{s}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </>
+                            )}
+
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700">Alergias</label>
+                                <input
+                                    type="text"
+                                    value={data.alergias}
+                                    onChange={(e) => setData('alergias', e.target.value)}
+                                    placeholder="Ej. Ninguna o Especificar"
+                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                />
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700">Teléfono del Paciente</label>
+                                <input
+                                    type="text"
+                                    value={data.telefono}
+                                    onChange={(e) => setData('telefono', e.target.value)}
+                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                    required
+                                />
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    {/* 📌 SECCIÓN: Contacto de Emergencia */}
+                    <fieldset className="border border-gray-300 rounded-md p-6">
+                        <legend className="text-base font-semibold text-gray-700 px-2">Contacto de Emergencia</legend>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Parentesco</label>
+                                <select
+                                    value={data.parentesco}
+                                    onChange={(e) => setData('parentesco', e.target.value)}
+                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                    required
+                                >
+                                    <option value="">Seleccione...</option>
+                                    {parentescos.map((p, i) => (
+                                        <option key={i} value={p}>{p}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {showParentescoOtro && (
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Programa Educativo</label>
-                                    <select
-                                        value={data.programaEducativo}
-                                        onChange={(e) => setData('programaEducativo', e.target.value)}
+                                    <label className="block text-sm font-medium text-gray-700">Especifique Parentesco</label>
+                                    <input
+                                        type="text"
+                                        value={data.detalleParentesco}
+                                        onChange={(e) => setData('detalleParentesco', e.target.value)}
                                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                                         required
-                                        disabled={!!paciente} // Deshabilitado si es edición
-                                    >
-                                        {/* Si ya existe el programa educativo, lo mostramos como seleccionado */}
-                                        <option value={data.programaEducativo}>{data.programaEducativo}</option>
-                                        <option value="">Seleccione...</option>
-                                        {programas.map((programa, index) => (
-                                            <option key={index} value={programa}>
-                                                {programa}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errors.programaEducativo && <div className="text-sm text-red-600">{errors.programaEducativo}</div>}
+                                    />
                                 </div>
+                            )}
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Semestre</label>
-                                    <select
-                                        value={data.semestre}
-                                        onChange={(e) => setData('semestre', e.target.value)}
-                                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                                        required
-                                        disabled={!!paciente} // Deshabilitado si es edición
-                                    >
-                                        <option value="">Seleccione...</option>
-                                        {semestres.map((semestre) => (
-                                            <option key={semestre} value={semestre}>
-                                                {semestre}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errors.semestre && <div className="text-sm text-red-600">{errors.semestre}</div>}
-                                </div>
-                            </>
-                        )}
-                    </div>
-
-                    {/* Alergias */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">¿Tiene alergias?</label>
-                        <select
-                            value={data.alergias}
-                            onChange={(e) => setData('alergias', e.target.value)}
-                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                            required
-                        >
-                            <option value="">Seleccione...</option>
-                            <option value="Sí">Sí</option>
-                            <option value="No">No</option>
-                        </select>
-                        {errors.alergias && <div className="text-sm text-red-600">{errors.alergias}</div>}
-                    </div>
-
-                    {/* Detalles de alergias */}
-                    {showAlergiasDetail && (
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Detalles de Alergias</label>
-                            <textarea
-                                value={data.detalleAlergias}
-                                onChange={(e) => setData('detalleAlergias', e.target.value)}
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                            />
-                            {errors.detalleAlergias && <div className="text-sm text-red-600">{errors.detalleAlergias}</div>}
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700">Teléfono de Emergencia</label>
+                                <input
+                                    type="text"
+                                    value={data.telefonoEmergencia}
+                                    onChange={(e) => setData('telefonoEmergencia', e.target.value)}
+                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                    required
+                                />
+                            </div>
                         </div>
-                    )}
+                    </fieldset>
 
-                    {/* Teléfono */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Teléfono</label>
-                        <input
-                            type="text"
-                            value={data.telefono}
-                            onChange={(e) => setData('telefono', e.target.value)}
-                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                            required
-                        />
-                        {errors.telefono && <div className="text-sm text-red-600">{errors.telefono}</div>}
-                    </div>
-
-                    {/* Parentesco */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Parentesco</label>
-                        <input
-                            type="text"
-                            value={data.parentesco}
-                            onChange={(e) => setData('parentesco', e.target.value)}
-                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                            required
-                        />
-                        {errors.parentesco && <div className="text-sm text-red-600">{errors.parentesco}</div>}
-                    </div>
-
-                    {/* Teléfono de Emergencia */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Teléfono de Emergencia</label>
-                        <input
-                            type="text"
-                            value={data.telefonoEmergencia}
-                            onChange={(e) => setData('telefonoEmergencia', e.target.value)}
-                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                            required
-                        />
-                        {errors.telefonoEmergencia && <div className="text-sm text-red-600">{errors.telefonoEmergencia}</div>}
-                    </div>
-
-                    <div className="mt-6 text-center">
+                    <div className="mt-8 text-center">
                         <button
                             type="submit"
                             disabled={processing}
-                            className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 shadow"
                         >
-                            {paciente ? 'Actualizar Paciente' : 'Registrar Paciente'}
+                            {paciente ? "Actualizar Paciente" : "Registrar Paciente"}
                         </button>
                     </div>
                 </form>
