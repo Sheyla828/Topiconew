@@ -3,9 +3,10 @@ import { Head, Link } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 
 export default function Index({ auth, atenciones }) {
-    const [fecha, setFecha] = useState(''); 
-    const [filteredAtenciones, setFilteredAtenciones] = useState(atenciones?.data || []); 
-    const [allAtenciones, setAllAtenciones] = useState(atenciones?.data || []); 
+    const [fecha, setFecha] = useState('');
+    const [filteredAtenciones, setFilteredAtenciones] = useState(atenciones?.data || []);
+    const [allAtenciones, setAllAtenciones] = useState(atenciones?.data || []);
+
     useEffect(() => {
         if (atenciones && Array.isArray(atenciones.data)) {
             setAllAtenciones(atenciones.data);
@@ -29,7 +30,7 @@ export default function Index({ auth, atenciones }) {
         }
     };
 
-     const handleDelete = (id) => {
+    const handleDelete = (id) => {
         if (confirm("¿Estás seguro de eliminar esta atención?")) {
             fetch(route('atencion.destroy', id), {
                 method: 'DELETE',
@@ -40,7 +41,7 @@ export default function Index({ auth, atenciones }) {
                 if (response.ok) {
                     setFilteredAtenciones(filteredAtenciones.filter((aten) => aten.id !== id));
                 } else {
-                    alert('Error al eliminar la atención.'); // Manejo de errores
+                    alert('Error al eliminar la atención.');
                 }
             });
         }
@@ -49,89 +50,104 @@ export default function Index({ auth, atenciones }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 bg-[#b6ffff] leading-tight">Atenciones</h2>}
+            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Listado de Atenciones</h2>}
         >
-            <Head title="Atencion" />
+            <Head title="Atenciones" />
 
-            <div className="py-12">
-                <div className="mb-4 flex justify-between items-center">
-                    <div className="flex items-center">
-                        <label htmlFor="fecha" className="mr-2 text-gray-700">Buscar por Fecha:</label>
-                        <input 
-                            id="fecha" 
-                            type="date" 
-                            value={fecha} 
-                            onChange={(e) => setFecha(e.target.value)} 
-                            className="border border-gray-300 p-2 rounded-lg bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
-                    <button 
-                        onClick={handleSearch}
-                        className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-700"
-                    >
-                        Buscar
-                    </button>
-                </div>
+            <div className="py-12 bg-[#b6ffff] min-h-screen">
+                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                    <div className="bg-white shadow border border-gray-200 rounded-lg p-6">
+                        {/* Filtros y botón */}
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                            <div className="flex items-center space-x-2">
+                                <label htmlFor="fecha" className="text-gray-700 font-medium">Buscar por Fecha:</label>
+                                <input
+                                    id="fecha"
+                                    type="date"
+                                    value={fecha}
+                                    onChange={(e) => setFecha(e.target.value)}
+                                    className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                />
+                                <button
+                                    onClick={handleSearch}
+                                    className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-md ml-2"
+                                >
+                                    Buscar
+                                </button>
+                            </div>
+                            <Link
+                                href={route('atencion.create')}
+                                className="mt-4 md:mt-0 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md"
+                            >
+                                ➕ Nueva Atención
+                            </Link>
+                        </div>
 
-                <table className="w-full text-sm text-left rtl:text-right text-gray-500 bg-[#84eded]">
-                    <thead className="text-sx text-gray-700 bg-[#71dada] dark:bg-gray-200">
-                        <tr className="text-nowrap">
-                            <th className="px-3 py-3">Nro Atención</th>
-                            <th className="px-3 py-3">Enfermera</th>
-                            <th className="px-3 py-3">Paciente</th>
-                            <th className="px-3 py-3">Medicamentos</th>
-                            <th className="px-3 py-3">Materiales</th>
-                            <th className="px-3 py-3">Fecha</th>
-                            <th className="px-3 py-3">Hora</th>
-                            <th className="px-3 py-3">Valoración</th>
-                            <th className="px-3 py-3">Diagnóstico</th>
-                            <th className="px-3 py-3">Tratamiento</th>
-                            <th className="px-3 py-3">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {
-                            filteredAtenciones.length > 0 ? (
-                                filteredAtenciones.map((aten) => (
-                                    <tr key={aten.id}>
-                                        <td>{aten.id}</td>
-                                        <td>{formatData(aten.user?.name)}</td>
-                                        <td>{formatData(aten.paciente?.nombre)} {formatData(aten.paciente?.aPaterno)} {formatData(aten.paciente?.aMaterno)}</td>
-                                        <td>{formatResources(aten.medicamentosUsados)}</td>
-                                        <td>{formatResources(aten.materiales)}</td>
-                                        <td>{aten.fecha}</td>
-                                        <td>{aten.hora}</td>
-                                        <td>{aten.valoracion}</td>
-                                        <td>{aten.diagnostico}</td>
-                                        <td>{aten.tratamiento}</td>
-                                        <td>
-                                            <Link
-                                                href={route("atencion.show", aten.id)}
-                                                className="text-green-500 hover:text-green-700 mr-4"
-                                            >
-                                                Ver
-                                            </Link>
-                                            <Link
-                                                href={route('atencion.edit', aten.id)}
-                                                className="text-blue-500 hover:text-blue-700 mr-4"
-                                            >
-                                                Editar
-                                            </Link>
-                                            
-                                        </td>
+                        {/* Contenedor con scroll horizontal */}
+                        <div className="overflow-x-auto rounded-lg shadow-inner">
+                            <table className="w-full min-w-[1200px] text-sm text-left text-gray-700">
+                                <thead className="bg-sky-200 text-gray-800 uppercase">
+                                    <tr>
+                                        <th className="px-4 py-2">Nro</th>
+                                        <th className="px-4 py-2">Enfermera</th>
+                                        <th className="px-4 py-2">Paciente</th>
+                                        <th className="px-4 py-2">Medicamentos</th>
+                                        <th className="px-4 py-2">Materiales</th>
+                                        <th className="px-4 py-2">Fecha</th>
+                                        <th className="px-4 py-2">Hora</th>
+                                        <th className="px-4 py-2">Valoración</th>
+                                        <th className="px-4 py-2">Diagnóstico</th>
+                                        <th className="px-4 py-2">Tratamiento</th>
+                                        <th className="px-4 py-2">Acciones</th>
                                     </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="11" className="text-center py-4">No hay datos disponibles</td>
-                                </tr>
-                            )}
-                    </tbody>
-                </table>
-
-              
-                <div className="flex justify-center mt-4 space-x-4">
-                    <Link href={route('atencion.create')} className="bg-yellow-500 text-white px-6 py-2 rounded hover:bg-yellow-700">➕ NUEVO</Link>
+                                </thead>
+                                <tbody className="bg-white">
+                                    {filteredAtenciones.length > 0 ? (
+                                        filteredAtenciones.map((aten) => (
+                                            <tr key={aten.id} className="border-b border-gray-200">
+                                                <td className="px-4 py-2">{aten.id}</td>
+                                                <td className="px-4 py-2">{formatData(aten.user?.name)}</td>
+                                                <td className="px-4 py-2">{formatData(aten.paciente?.nombre)} {formatData(aten.paciente?.aPaterno)}</td>
+                                                <td className="px-4 py-2">{formatResources(aten.medicamentosUsados)}</td>
+                                                <td className="px-4 py-2">{formatResources(aten.materiales)}</td>
+                                                <td className="px-4 py-2">{aten.fecha}</td>
+                                                <td className="px-4 py-2">{aten.hora}</td>
+                                                <td className="px-4 py-2">{aten.valoracion}</td>
+                                                <td className="px-4 py-2">{aten.diagnostico}</td>
+                                                <td className="px-4 py-2">{aten.tratamiento}</td>
+                                                <td className="px-4 py-2 space-x-2">
+                                                    <Link
+                                                        href={route("atencion.show", aten.id)}
+                                                        className="text-green-600 hover:text-green-800 font-semibold"
+                                                    >
+                                                        Ver
+                                                    </Link>
+                                                    <Link
+                                                        href={route("atencion.edit", aten.id)}
+                                                        className="text-blue-600 hover:text-blue-800 font-semibold"
+                                                    >
+                                                        Editar
+                                                    </Link>
+                                                    <button
+                                                        onClick={() => handleDelete(aten.id)}
+                                                        className="text-red-600 hover:text-red-800 font-semibold"
+                                                    >
+                                                        Eliminar
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="11" className="text-center py-4 text-gray-500">
+                                                No hay atenciones disponibles.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </AuthenticatedLayout>
