@@ -24,7 +24,7 @@ class Medicamento extends Model
     protected $fillable = [
         'nombre',
         'cantidad',
-        'unidadmedida',
+        'fechaingreso',
         'fechavencimiento',
     ];
 

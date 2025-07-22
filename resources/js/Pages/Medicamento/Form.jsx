@@ -5,13 +5,12 @@ export default function FormularioMedicamento({ auth, medicamento }) {
   const { data, setData, post, put, processing, errors } = useForm({
     nombre: medicamento?.nombre || '',
     cantidad: medicamento?.cantidad || '',
-    unidadmedida: medicamento?.unidadmedida || '',
+    fechaingreso: medicamento?.fechaingreso || '',
     fechavencimiento: medicamento?.fechavencimiento || '',
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (medicamento) {
       put(route('medicamento.update', medicamento.id), { data });
     } else {
@@ -69,20 +68,20 @@ export default function FormularioMedicamento({ auth, medicamento }) {
               )}
             </div>
 
-            {/* Campo Unidad de Medida */}
+            {/* Campo Fecha de Ingreso */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Unidad de Medida
+                Fecha de Ingreso
               </label>
               <input
-                type="text"
-                value={data.unidadmedida}
-                onChange={(e) => setData('unidadmedida', e.target.value)}
+                type="date"
+                value={data.fechaingreso}
+                onChange={(e) => setData('fechaingreso', e.target.value)}
                 className="block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 required
               />
-              {errors.unidadmedida && (
-                <p className="text-sm text-red-600 mt-1">{errors.unidadmedida}</p>
+              {errors.fechaingreso && (
+                <p className="text-sm text-red-600 mt-1">{errors.fechaingreso}</p>
               )}
             </div>
 

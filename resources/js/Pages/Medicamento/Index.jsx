@@ -123,7 +123,7 @@ export default function Index({ auth, medicamentos }) {
                                         <th className="px-4 py-2">ID</th>
                                         <th className="px-4 py-2">Nombre</th>
                                         <th className="px-4 py-2">Cantidad</th>
-                                        <th className="px-4 py-2">Unidad Medida</th>
+                                        <th className="px-4 py-2">Fecha Ingreso</th>
                                         <th className="px-4 py-2">Fecha Vencimiento</th>
                                         <th className="px-4 py-2">Acciones</th>
                                     </tr>
@@ -135,7 +135,7 @@ export default function Index({ auth, medicamentos }) {
                                                 <td className="px-4 py-2">{medi.id}</td>
                                                 <td className="px-4 py-2">{medi.nombre}</td>
                                                 <td className="px-4 py-2">{medi.cantidad}</td>
-                                                <td className="px-4 py-2">{medi.unidadmedida}</td>
+                                                <td className="px-4 py-2">{medi.fechaingreso}</td>
                                                 <td className="px-4 py-2">{medi.fechavencimiento}</td>
                                                 <td className="px-4 py-2 space-x-2">
                                                     <Link

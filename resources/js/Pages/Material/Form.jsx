@@ -5,18 +5,16 @@ export default function FormularioMaterial({ auth, materiale }) {
     const { data, setData, post, put, processing, errors } = useForm({
         nombre: materiale?.nombre || '',
         cantidad: materiale?.cantidad || '',
-        unidadmedida: materiale?.unidadmedida || '',
+        fechaingreso: materiale?.fechaingreso || '',
         fechavencimiento: materiale?.fechavencimiento || '',
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Si el material existe, se actualiza
         if (materiale) {
             put(route('material.update', materiale.id), { data });
         } else {
-            // Si el material no existe, se crea
             post(route('material.store'), { data });
         }
     };
@@ -24,81 +22,89 @@ export default function FormularioMaterial({ auth, materiale }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Agregar/Modificar Material</h2>}
+            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                {materiale ? "Editar Material" : "Registrar Nuevo Material"}
+            </h2>}
         >
             <Head title="Material" />
 
-            <div className="py-12 flex justify-center">
-                <form onSubmit={handleSubmit} className="w-full max-w-4xl space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Campo Nombre Material */}
+            <div className="py-12 flex justify-center bg-[#b6ffff] min-h-screen px-4">
+                <div className="w-full max-w-4xl bg-white border border-gray-200 rounded-lg shadow p-6 md:p-8">
+                    <h3 className="text-lg font-semibold mb-4">Datos del Material</h3>
+
+                    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Nombre */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Nombre del Material</label>
                             <input
                                 type="text"
                                 value={data.nombre}
                                 onChange={(e) => setData('nombre', e.target.value)}
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                className="block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 required
                             />
-                            {errors.nombre && <div className="text-sm text-red-600">{errors.nombre}</div>}
+                            {errors.nombre && <p className="text-sm text-red-600 mt-1">{errors.nombre}</p>}
                         </div>
 
-                        {/* Campo Cantidad */}
+                        {/* Cantidad */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Cantidad</label>
                             <input
                                 type="number"
                                 value={data.cantidad}
                                 onChange={(e) => setData('cantidad', e.target.value)}
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                className="block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 required
                             />
-                            {errors.cantidad && <div className="text-sm text-red-600">{errors.cantidad}</div>}
+                            {errors.cantidad && <p className="text-sm text-red-600 mt-1">{errors.cantidad}</p>}
                         </div>
 
-                        {/* Campo Unidad de Medida */}
+                        {/* Fecha Ingreso */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Unidad de Medida</label>
+                            <label className="block text-sm font-medium text-gray-700">Fecha de Ingreso</label>
                             <input
-                                type="text"
-                                value={data.unidadmedida}
-                                onChange={(e) => setData('unidadmedida', e.target.value)}
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                type="date"
+                                value={data.fechaingreso}
+                                onChange={(e) => setData('fechaingreso', e.target.value)}
+                                className="block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 required
                             />
-                            {errors.unidadmedida && <div className="text-sm text-red-600">{errors.unidadmedida}</div>}
+                            {errors.fechaingreso && <p className="text-sm text-red-600 mt-1">{errors.fechaingreso}</p>}
                         </div>
 
-                        {/* Campo Fecha de Vencimiento */}
+                        {/* Fecha Vencimiento */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Fecha de Vencimiento</label>
                             <input
                                 type="date"
                                 value={data.fechavencimiento}
                                 onChange={(e) => setData('fechavencimiento', e.target.value)}
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                                className="block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 required
                             />
-                            {errors.fechavencimiento && <div className="text-sm text-red-600">{errors.fechavencimiento}</div>}
+                            {errors.fechavencimiento && <p className="text-sm text-red-600 mt-1">{errors.fechavencimiento}</p>}
                         </div>
-                    </div>
+                    </form>
 
-                    {/* Botones de acción */}
-                    <div className="flex justify-end space-x-2">
+                    {/* Botones */}
+                    <div className="flex justify-end mt-6 gap-4">
                         <button
                             type="submit"
+                            onClick={handleSubmit}
                             disabled={processing}
-                            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md"
+                            className="px-6 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 transition"
                         >
-                            {materiale ? 'Actualizar Material' : 'Guardar Material'}
+                            {materiale ? "Actualizar" : "Guardar"}
                         </button>
-                        <Link href={route('material.index')} className="inline-flex items-center px-4 py-2 bg-gray-300 text-black rounded-md">
+                        <Link
+                            href={route('material.index')}
+                            className="px-6 py-2 bg-gray-300 text-black rounded-md hover:bg-gray-400 transition"
+                        >
                             Cancelar
                         </Link>
                     </div>
-                </form>
-            </div>  
+                </div>
+            </div>
         </AuthenticatedLayout>
     );
 }

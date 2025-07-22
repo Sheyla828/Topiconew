@@ -16,7 +16,7 @@ class Materiale extends Model
     protected $fillable = [
         'nombre',
         'cantidad',
-        'unidadmedida',
+        'fechaingreso',
         'fechavencimiento',
     ];
 
