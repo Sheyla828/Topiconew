@@ -24,8 +24,6 @@ export default function Index({ auth, materiales }) {
                     return material.nombre.toLowerCase().includes(searchValue.toLowerCase());
                 } else if (searchBy === "fecha") {
                     return material.fechavencimiento === searchValue;
-                } else if (searchBy === "unidadmedida") {
-                    return material.unidadmedida.toLowerCase().includes(searchValue.toLowerCase());
                 }
                 return true;
             });
@@ -56,11 +54,9 @@ export default function Index({ auth, materiales }) {
             <div className="py-12 bg-[#b6ffff] min-h-screen">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white border border-gray-200 shadow rounded-lg p-6">
-
-                        {/* Sección de búsqueda */}
+                        {/* Buscador */}
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
                             <div className="flex flex-wrap items-center gap-4">
-                                {/* Buscar por nombre */}
                                 <label className="flex items-center font-medium text-gray-700">
                                     <input
                                         type="radio"
@@ -82,7 +78,6 @@ export default function Index({ auth, materiales }) {
                                     />
                                 )}
 
-                                {/* Buscar por fecha */}
                                 <label className="flex items-center font-medium text-gray-700">
                                     <input
                                         type="radio"
@@ -103,29 +98,6 @@ export default function Index({ auth, materiales }) {
                                     />
                                 )}
 
-                                {/* Buscar por unidad de medida */}
-                                <label className="flex items-center font-medium text-gray-700">
-                                    <input
-                                        type="radio"
-                                        name="searchBy"
-                                        value="unidadmedida"
-                                        checked={searchBy === "unidadmedida"}
-                                        onChange={() => setSearchBy("unidadmedida")}
-                                        className="ml-4 mr-2"
-                                    />
-                                    Unidad Medida:
-                                </label>
-                                {searchBy === "unidadmedida" && (
-                                    <input
-                                        type="text"
-                                        placeholder="Unidad de medida"
-                                        value={searchValue}
-                                        onChange={handleSearchChange}
-                                        className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                                    />
-                                )}
-
-                                {/* Botón Buscar */}
                                 <button
                                     onClick={handleSearch}
                                     className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-md"
@@ -150,19 +122,19 @@ export default function Index({ auth, materiales }) {
                                         <th className="px-4 py-2">ID</th>
                                         <th className="px-4 py-2">Nombre</th>
                                         <th className="px-4 py-2">Cantidad</th>
-                                        <th className="px-4 py-2">Unidad Medida</th>
-                                        <th className="px-4 py-2">Fecha</th>
+                                        <th className="px-4 py-2">Fecha Ingreso</th>
+                                        <th className="px-4 py-2">Fecha Vencimiento</th>
                                         <th className="px-4 py-2">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white">
-                                    {filteredMateriales && filteredMateriales.length > 0 ? (
+                                    {filteredMateriales.length > 0 ? (
                                         filteredMateriales.map((material) => (
                                             <tr key={material.id} className="border-b border-gray-200">
                                                 <td className="px-4 py-2">{material.id}</td>
                                                 <td className="px-4 py-2">{material.nombre}</td>
                                                 <td className="px-4 py-2">{material.cantidad}</td>
-                                                <td className="px-4 py-2">{material.unidadmedida}</td>
+                                                <td className="px-4 py-2">{material.fechaingreso}</td>
                                                 <td className="px-4 py-2">{material.fechavencimiento}</td>
                                                 <td className="px-4 py-2 space-x-2">
                                                     <Link
@@ -190,7 +162,6 @@ export default function Index({ auth, materiales }) {
                                 </tbody>
                             </table>
                         </div>
-
                     </div>
                 </div>
             </div>

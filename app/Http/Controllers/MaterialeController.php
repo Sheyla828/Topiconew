@@ -35,8 +35,9 @@ class MaterialeController extends Controller
         $data = $request->validate([
             'nombre' => 'required|string|max:255',
             'cantidad' => 'required|integer|min:0',
-            'unidadmedida' => 'required|string|max:50',
+            'fechaingreso' => 'required|date',
             'fechavencimiento' => 'required|date',
+        
         ]);
 
         Materiale::create($data);
@@ -66,7 +67,7 @@ class MaterialeController extends Controller
         $data = $request->validate([
             'nombre' => 'required|string|max:255',
             'cantidad' => 'required|integer|min:0',
-            'unidadmedida' => 'required|string|max:50',
+            'fechaingreso' => 'required|date',
             'fechavencimiento' => 'required|date',
         ]);
 
