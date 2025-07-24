@@ -36,6 +36,14 @@ export default function Index({ auth, pacientes }) {
     setFilteredPatients(results);
   };
 
+  // 🔄 FUNCION PARA RECARGAR LISTA
+  const handleReload = () => {
+    setSearchValue("");
+    setSelectedOcupacion("");
+    setSelectedProgram("");
+    setFilteredPatients(pacientes);
+  };
+
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -49,6 +57,23 @@ export default function Index({ auth, pacientes }) {
 
       <div className="py-12 px-4 bg-[#b6ffff] min-h-screen">
         <div className="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow border border-sky-200">
+
+          {/* 🔝 BOTONES ARRIBA */}
+          <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
+            <Link
+              href={route("paciente.create")}
+              className="inline-flex items-center gap-1 bg-sky-600 text-white px-6 py-2 rounded hover:bg-sky-700 transition"
+            >
+              ➕ Nuevo Paciente
+            </Link>
+            <button
+              onClick={handleReload}
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition"
+            >
+              🔄 Cargar
+            </button>
+          </div>
+
           {/* 📌 Filtros */}
           <div className="mb-6">
             <div className="flex flex-wrap gap-4 items-center mb-4">
@@ -228,15 +253,6 @@ export default function Index({ auth, pacientes }) {
                 )}
               </tbody>
             </table>
-          </div>
-
-          <div className="flex justify-center mt-6">
-            <Link
-              href={route("paciente.create")}
-              className="inline-flex items-center gap-1 bg-sky-600 text-white px-6 py-2 rounded hover:bg-sky-700 transition"
-            >
-              ➕ Nuevo Paciente
-            </Link>
           </div>
         </div>
       </div>

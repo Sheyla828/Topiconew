@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use App\Models\Atencione;
 use App\Models\AtencionMedicamento;
 use App\Models\AtencionMateriale;
@@ -17,7 +19,8 @@ class AtencioneController extends Controller
 {
     public function index()
     {
-        $atenciones = Atencione::with(['user', 'paciente', 'medicamentosUsados.medicamento'])->paginate(100);
+        $atenciones = Atencione::with(['user', 'paciente', 'medicamentosUsados.medicamento', 'materialesUsados.materiale'])
+            ->paginate(100);
 
         return Inertia::render('Atencion/Index', [
             'atenciones' => $atenciones
@@ -51,24 +54,33 @@ class AtencioneController extends Controller
             'saturacionOxigeno' => 'nullable|numeric',
             'frecuenciaRespiratoria' => 'nullable|numeric',
             'medicamentos' => 'nullable|array',
-            'medicamentos.*.id' => 'required|exists:medicamentos,id',
-            'medicamentos.*.cantidad_usada' => 'required|numeric',
+            'medicamentos.*.id' => 'required_with:medicamentos|exists:medicamentos,id',
+            'medicamentos.*.cantidad_usada' => 'required_with:medicamentos|numeric|min:1',
             'materiales' => 'nullable|array',
-            'materiales.*.id' => 'exists:materiales,id',
-            'materiales.*.cantidad_usada' => 'required|numeric',
+            'materiales.*.id' => 'required_with:materiales|exists:materiales,id',
+            'materiales.*.cantidad_usada' => 'required_with:materiales|numeric|min:1',
         ]);
 
         try {
             DB::transaction(function () use ($data) {
-                 $atencion = Atencione::create(array_merge($data, [
-                    'fecha' => Carbon::now()->format('Y-m-d'),
-                    'hora' => Carbon::now()->format('H:i:s'),
+                // Crear la atención
+                $atencion = Atencione::create(array_merge($data, [
+                    'fecha' => Carbon::now()->toDateString(),
+                    'hora' => Carbon::now()->toTimeString(),
                 ]));
-    
-                 $this->saveMedicamentos($atencion->id, $data['medicamentos']);
-    
-                 $this->saveMateriales($atencion->id, $data['materiales']);
-                 $this->updateCitaEstado($data['paciente_id'], $atencion->fecha, $atencion->hora);
+
+                // Guardar medicamentos
+                if (!empty($data['medicamentos'])) {
+                    $this->saveMedicamentos($atencion->id, $data['medicamentos']);
+                }
+
+                // Guardar materiales
+                if (!empty($data['materiales'])) {
+                    $this->saveMateriales($atencion->id, $data['materiales']);
+                }
+
+                // Actualizar estado de la cita
+                $this->updateCitaEstado($data['paciente_id'], $atencion->fecha);
             });
 
             return redirect()->route('atencion.index')->with('success', 'Atención registrada con éxito');
@@ -78,33 +90,32 @@ class AtencioneController extends Controller
     }
 
     protected function saveMedicamentos($atencionId, $medicamentos)
-{
-    foreach ($medicamentos as $medicamento) {
-        AtencionMedicamento::create([
-            'atencione_id' => $atencionId,
-            'medicamento_id' => $medicamento['id'],
-            'cantidad_usada' => $medicamento['cantidad_usada'],
-        ]);
+    {
+        foreach ($medicamentos as $medicamento) {
+            AtencionMedicamento::create([
+                'atencione_id' => $atencionId,
+                'medicamento_id' => $medicamento['id'],
+                'cantidad_usada' => $medicamento['cantidad_usada'],
+            ]);
+        }
     }
-}
 
-protected function saveMateriales($atencionId, $materiales)
-{
-    foreach ($materiales as $material) {
-        AtencionMateriale::create([
-            'atencione_id' => $atencionId,
-            'materiale_id' => $material['id'],
-            'cantidad_usada' => $material['cantidad_usada'],
-        ]);
+    protected function saveMateriales($atencionId, $materiales)
+    {
+        foreach ($materiales as $material) {
+            AtencionMateriale::create([
+                'atencione_id' => $atencionId,
+                'materiale_id' => $material['id'],
+                'cantidad_usada' => $material['cantidad_usada'],
+            ]);
+        }
     }
-}
 
-
-    protected function updateCitaEstado($pacienteId, $fecha, $hora)
+    protected function updateCitaEstado($pacienteId, $fecha)
     {
         $cita = Cita::where('paciente_id', $pacienteId)
-                     ->where('fechacita', $fecha)
-                     ->first();
+            ->where('fechacita', $fecha)
+            ->first();
 
         if ($cita) {
             $cita->update(['estado' => 'atendido']);
@@ -113,8 +124,10 @@ protected function saveMateriales($atencionId, $materiales)
 
     public function edit($id)
     {
+        $atencion = Atencione::with(['medicamentosUsados.medicamento', 'materialesUsados.materiale'])->findOrFail($id);
+
         return Inertia::render('Atencion/Form', [
-            'atencion' => Atencione::with(['medicamentosUsados', 'materiales'])->findOrFail($id),
+            'atencion' => $atencion,
             'users' => User::all(),
             'pacientes' => Paciente::all(),
             'medicamentos' => Medicamento::all(),
@@ -131,14 +144,14 @@ protected function saveMateriales($atencionId, $materiales)
             'valoracion' => 'nullable|string',
             'diagnostico' => 'nullable|string',
             'tratamiento' => 'nullable|string',
-            'peso' => 'required|string',
-            'talla' => 'required|string',
-            'IMC' => 'required|string',
-            'frecuenciaCardiaca' => 'required|string',
+            'peso' => 'required|numeric',
+            'talla' => 'required|numeric',
+            'IMC' => 'required|numeric',
+            'frecuenciaCardiaca' => 'required|numeric',
             'presionArterial' => 'required|string',
-            'temperatura' => 'required|string',
-            'saturacionOxigeno' => 'required|string',
-            'frecuenciaRespiratoria' => 'required|string',
+            'temperatura' => 'required|numeric',
+            'saturacionOxigeno' => 'required|numeric',
+            'frecuenciaRespiratoria' => 'required|numeric',
             'medicamentos' => 'array',
             'medicamentos.*.id' => 'integer|exists:medicamentos,id',
             'medicamentos.*.cantidad_usada' => 'numeric|min:1',
@@ -147,17 +160,17 @@ protected function saveMateriales($atencionId, $materiales)
             'materiales.*.cantidad_usada' => 'numeric|min:1',
         ]);
 
-        $atencion->update($data);
+        DB::transaction(function () use ($atencion, $data, $id) {
+            $atencion->update($data);
 
-        DB::transaction(function () use ($id, $request) {
             AtencionMedicamento::where('atencione_id', $id)->delete();
-            if ($request->has('medicamentos')) {
-                $this->saveMedicamentos($id, $request->medicamentos);
+            if (!empty($data['medicamentos'])) {
+                $this->saveMedicamentos($id, $data['medicamentos']);
             }
 
             AtencionMateriale::where('atencione_id', $id)->delete();
-            if ($request->has('materiales')) {
-                $this->saveMateriales($id, $request->materiales);
+            if (!empty($data['materiales'])) {
+                $this->saveMateriales($id, $data['materiales']);
             }
         });
 
@@ -167,18 +180,12 @@ protected function saveMateriales($atencionId, $materiales)
     public function destroy(Atencione $atencion)
     {
         $atencion->delete();
-
         return redirect()->route('atencion.index')->with('success', 'Atención eliminada correctamente.');
     }
 
     public function show(Atencione $atencion)
     {
-        $atencion->load(['user', 'paciente', 'medicamentosUsados.medicamento']);
-
-        return Inertia::render('Atencion/Show', [
-            'atencion' => $atencion
-        ]);
+        $atencion->load(['user', 'paciente', 'medicamentosUsados.medicamento', 'materialesUsados.materiale']);
+        return Inertia::render('Atencion/Show', ['atencion' => $atencion]);
     }
-
-    
 }

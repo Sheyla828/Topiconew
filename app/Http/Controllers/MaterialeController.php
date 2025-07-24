@@ -9,11 +9,18 @@ use Inertia\Inertia;
 class MaterialeController extends Controller
 {
     /**
-     * Mostrar la lista de materiales.
+     * Mostrar la lista de materiales (agrupando por nombre).
      */
     public function index()
     {
-        $materiales = Materiale::paginate(10);
+        $materiales = Materiale::selectRaw(
+            'MIN(id) as id, nombre, SUM(cantidad) as cantidad, 
+            MAX(fechaingreso) as fechaingreso, 
+            MAX(fechavencimiento) as fechavencimiento'
+        )
+        ->groupBy('nombre')
+        ->paginate(10);
+
         return Inertia::render("Material/Index", [
             'materiales' => $materiales
         ]);
@@ -37,9 +44,9 @@ class MaterialeController extends Controller
             'cantidad' => 'required|integer|min:0',
             'fechaingreso' => 'required|date',
             'fechavencimiento' => 'required|date',
-        
         ]);
 
+        // Cada ingreso es un nuevo registro
         Materiale::create($data);
 
         return redirect(route('material.index'))
@@ -86,5 +93,23 @@ class MaterialeController extends Controller
 
         return redirect(route('material.index'))
             ->with('success', 'Material eliminado correctamente.');
+    }
+
+    /**
+     * Mostrar el detalle de todos los registros de un mismo material.
+     */
+    public function show($id)
+    {
+        $material = Materiale::findOrFail($id);
+
+        // Traer todos los registros con el mismo nombre (sin agrupar)
+        $materiales = Materiale::whereRaw('LOWER(nombre) = ?', [strtolower($material->nombre)])
+            ->orderBy('fechaingreso', 'desc')
+            ->get();
+
+        return Inertia::render('Material/Show', [
+            'nombre' => $material->nombre,
+            'materiales' => $materiales,
+        ]);
     }
 }

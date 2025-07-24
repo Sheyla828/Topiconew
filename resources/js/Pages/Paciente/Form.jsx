@@ -269,7 +269,7 @@ export default function FormularioPaciente({ auth, paciente }) {
                                     value={data.parentesco}
                                     onChange={(e) => setData('parentesco', e.target.value)}
                                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                                    required
+                                    
                                 >
                                     <option value="">Seleccione...</option>
                                     {parentescos.map((p, i) => (
@@ -286,7 +286,7 @@ export default function FormularioPaciente({ auth, paciente }) {
                                         value={data.detalleParentesco}
                                         onChange={(e) => setData('detalleParentesco', e.target.value)}
                                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                                        required
+                                        
                                     />
                                 </div>
                             )}
@@ -298,7 +298,7 @@ export default function FormularioPaciente({ auth, paciente }) {
                                     value={data.telefonoEmergencia}
                                     onChange={(e) => setData('telefonoEmergencia', e.target.value)}
                                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                                    required
+                                    
                                 />
                             </div>
                         </div>

@@ -38,7 +38,8 @@ class Medicamento extends Model
     ];
     public function atenciones()
 {
-    return $this->belongsToMany(AtencionMedicamento::class);
+    return $this->hasMany(AtencionMedicamento::class, 'medicamento_id');
     
 }
+
 }
