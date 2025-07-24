@@ -9,6 +9,8 @@ class AtencionMedicamento extends Model
 {
     use HasFactory;
 
+    protected $table = 'atencion_medicamentos';
+
     protected $fillable = ['atencione_id', 'medicamento_id', 'cantidad_usada'];
 
     public function atencione()

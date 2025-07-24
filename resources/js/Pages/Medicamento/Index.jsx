@@ -138,19 +138,21 @@ export default function Index({ auth, medicamentos }) {
                                                 <td className="px-4 py-2">{medi.fechaingreso}</td>
                                                 <td className="px-4 py-2">{medi.fechavencimiento}</td>
                                                 <td className="px-4 py-2 space-x-2">
-                                                    <Link
-                                                        href={route('medicamento.edit', medi.id)}
-                                                        className="text-blue-600 hover:text-blue-800 font-semibold"
-                                                    >
-                                                        Editar
-                                                    </Link>
-                                                    <button
-                                                        onClick={() => handleDelete(medi.id)}
-                                                        className="text-red-600 hover:text-red-800 font-semibold"
-                                                    >
-                                                        Eliminar
-                                                    </button>
-                                                </td>
+    <Link
+    href={route('medicamento.show', medi.id)}
+    className="text-blue-600 hover:text-blue-800 font-semibold"
+>
+    Ver
+</Link>
+
+    <Link
+        href={route('medicamento.edit', medi.id)}
+        className="text-blue-600 hover:text-blue-800 font-semibold"
+    >
+        Editar
+    </Link>
+</td>
+
                                             </tr>
                                         ))
                                     ) : (

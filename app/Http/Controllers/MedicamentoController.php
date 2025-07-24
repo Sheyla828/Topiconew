@@ -12,12 +12,21 @@ class MedicamentoController extends Controller
      * Mostrar la lista de medicamentos.
      */
     public function index()
-    {
-        $medicamentos = Medicamento::paginate(10);
-        return Inertia::render("Medicamento/Index", [
-            'medicamentos' => $medicamentos
-        ]);
-    }
+{
+    $medicamentos = Medicamento::selectRaw(
+        'MIN(id) as id, nombre, SUM(cantidad) as cantidad, 
+        MAX(fechaingreso) as fechaingreso, 
+        MAX(fechavencimiento) as fechavencimiento'
+    )
+    ->groupBy('nombre')
+    ->paginate(10);
+
+    return Inertia::render("Medicamento/Index", [
+        'medicamentos' => $medicamentos
+    ]);
+}
+
+
 
     /**
      * Mostrar el formulario para crear un nuevo medicamento.
@@ -37,24 +46,15 @@ class MedicamentoController extends Controller
         'cantidad' => 'required|integer|min:0',
         'fechaingreso' => 'required|date',
         'fechavencimiento' => 'required|date',
-        
     ]);
 
-    // Buscar si ya existe un medicamento con el mismo nombre (sin importar mayúsculas/minúsculas)
-    $medicamentoExistente = Medicamento::whereRaw('LOWER(nombre) = ?', [strtolower($data['nombre'])])->first();
-
-    if ($medicamentoExistente) {
-        // Acumular la cantidad existente con la nueva cantidad
-        $medicamentoExistente->cantidad += $data['cantidad'];
-        $medicamentoExistente->save();
-    } else {
-        // Crear un nuevo medicamento si no existe
-        Medicamento::create($data);
-    }
+    // Cada ingreso es un nuevo registro
+    Medicamento::create($data);
 
     return redirect(route('medicamento.index'))
         ->with('success', 'Medicamento registrado correctamente.');
 }
+
 
     /**
      * Mostrar el formulario para editar un medicamento existente.
@@ -98,4 +98,20 @@ class MedicamentoController extends Controller
         return redirect(route('medicamento.index'))
             ->with('success', 'Medicamento eliminado correctamente.');
     }
+    public function show($id)
+{
+    $medicamento = Medicamento::findOrFail($id);
+
+    // Traer TODOS los registros con el mismo nombre (sin agrupar)
+    $medicamentos = Medicamento::whereRaw('LOWER(nombre) = ?', [strtolower($medicamento->nombre)])
+        ->orderBy('fechaingreso', 'desc')
+        ->get();
+
+    return Inertia::render('Medicamento/Show', [
+        'nombre' => $medicamento->nombre,
+        'medicamentos' => $medicamentos,
+    ]);
+}
+
+
 }

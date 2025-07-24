@@ -143,12 +143,12 @@ export default function Index({ auth, materiales }) {
                                                     >
                                                         Editar
                                                     </Link>
-                                                    <button
-                                                        onClick={() => handleDelete(material.id)}
-                                                        className="text-red-600 hover:text-red-800 font-semibold"
-                                                    >
-                                                        Eliminar
-                                                    </button>
+                                                    <Link
+    href={route('material.show', material.id)}
+    className="text-blue-600 hover:text-blue-800 font-semibold"
+>
+    Ver
+</Link>
                                                 </td>
                                             </tr>
                                         ))

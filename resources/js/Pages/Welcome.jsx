@@ -12,21 +12,20 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
         <>
             <Head title="Welcome" />
             <div className="bg-gray-50 text-black/50 dark:bg-black dark:text-white/50">
-                <img
+                <div
                     id="background"
-                    className="absolute inset-0 w-full h-full object-cover opacity-80"
-                    src="https://iesta.edu.pe/portal/wp-content/uploads/2022/11/ADMICION-GALERIA.png"
-                    alt="Background image"
-                />
+                    className="absolute inset-0 w-full h-full bg-[#b6ffff] opacity-80"
+                    alt="Background color"
+                ></div>
 
                 <div className="absolute top-0 left-0 ml-4 mt-4 flex flex-col items-start">
-    <img
-        className="h-50 w-auto text-white lg:h-50 lg:text-[#51a1ac]"
-        src="../imag/istta.png"                                 
-        alt="Logo"
-    />
-    <h2 className="text-4xl font-bold text-[#9e2a2a] mt-2 w-full text-center">IESTA</h2> 
-</div>      
+                    <img
+                        className="h-20 w-auto text-white lg:h-30 lg:text-[#51a1ac]"
+                        src="../imag/50.png"                                 
+                        alt="Logo"
+                    />
+                </div>      
+
                 <div className="relative min-h-screen flex flex-col items-center justify-center selection:bg-[#61c9c9] selection:text-white">
                     <div className="relative w-full max-w-2xl px-6 lg:max-w-7xl">
                         <header className="grid grid-cols-2 items-center gap-2 py-10 lg:grid-cols-3">

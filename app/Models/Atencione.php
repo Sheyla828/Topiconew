@@ -70,4 +70,22 @@ public function materialesUsados()
 {
     return $this->hasMany(AtencionMateriale::class);
 }
+
+
+public function medicamentos()
+{
+    return $this->belongsToMany(Medicamento::class, 'atencione_medicamento')
+                ->withPivot('cantidad_usada')
+                ->withTimestamps();
+}
+
+public function materiales()
+{
+    return $this->belongsToMany(Materiale::class, 'atencione_materiale')
+                ->withPivot('cantidad_usada')
+                ->withTimestamps();
+}
+
+
+
 }

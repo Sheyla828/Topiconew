@@ -10,24 +10,23 @@ class AtencionMateriale extends Model
     use HasFactory;
 
     // Tabla asociada (por si no sigue la convención de nombres)
-    protected $table = 'atencionMateriales';
+    protected $table = 'atencion_materiales'; // Nombre correcto de la tabla
 
     // Campos asignables
     protected $fillable = [
-        'atencion_id',
-        'material_id',
+        'atencione_id',   // Coincide con la migración
+        'materiale_id',   // Coincide con la migración
         'cantidad_usada',
     ];
 
     // Relación con la tabla Atencion
-    public function atencion()
+    public function atencione()
     {
-        return $this->belongsTo(Atencione::class);
+        return $this->belongsTo(Atencione::class, 'atencione_id');
     }
 
-    // Relación con la tabla Material
-    public function material()
+    public function materiale()
     {
-        return $this->belongsTo(Materiale::class);
+        return $this->belongsTo(Materiale::class, 'materiale_id');
     }
 }
