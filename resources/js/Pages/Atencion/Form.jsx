@@ -169,17 +169,19 @@ export default function AtencionForm({ auth, atencion, pacientes, medicamentos, 
               {medicamentoFields.map((med, i) => (
                 <div key={i} className="flex gap-2 mb-2">
                   <select
-                    value={med.id}
-                    onChange={(e) => handleMedicamentoChange(i, "id", e.target.value)}
-                    className="flex-1 border border-sky-300 rounded px-3 py-2"
-                  >
-                    <option value="">Seleccionar medicamento</option>
-                    {medicamentos.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.nombre}
-                      </option>
-                    ))}
-                  </select>
+  value={med.id}
+  onChange={(e) => handleMedicamentoChange(i, "id", e.target.value)}
+  className="flex-1 border border-sky-300 rounded px-3 py-2"
+>
+  <option value="">Seleccionar medicamento</option>
+  {medicamentos
+    .filter((m) => m.cantidad > 0) // <-- Solo los que tienen cantidad > 0
+    .map((m) => (
+      <option key={m.id} value={m.id}>
+        {m.nombre}
+      </option>
+    ))}
+</select>
                   <input
                     type="number"
                     value={med.cantidad_usada}
