@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AtencioneController extends Controller
 {
@@ -90,15 +91,16 @@ class AtencioneController extends Controller
     }
 
     protected function saveMedicamentos($atencionId, $medicamentos)
-    {
-        foreach ($medicamentos as $medicamento) {
-            AtencionMedicamento::create([
-                'atencione_id' => $atencionId,
-                'medicamento_id' => $medicamento['id'],
-                'cantidad_usada' => $medicamento['cantidad_usada'],
-            ]);
-        }
+{
+    Log::info('Medicamentos a guardar:', $medicamentos); // <-- Agrega esto para depurar
+    foreach ($medicamentos as $medicamento) {
+        AtencionMedicamento::create([
+            'atencione_id' => $atencionId,
+            'medicamento_id' => $medicamento['id'],
+            'cantidad_usada' => $medicamento['cantidad_usada'],
+        ]);
     }
+}
 
     protected function saveMateriales($atencionId, $materiales)
     {
